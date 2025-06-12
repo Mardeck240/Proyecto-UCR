@@ -5,6 +5,15 @@ clientes= []
 costos_producción= []
 menu= -1 # Movi menuu() adentro del while para que se repitiece el programa las veces necesarias
 
+try:
+    with open("inventario.txt", "r") as file:
+        for text in file:
+            control_inventario.append(text)
+        print(control_inventario)
+except:
+    pass
+
+
 def err():
      print("Lo que digitó no se encuentra dentro de las opciones, digite nuevamente")
     
@@ -87,6 +96,10 @@ while menu!=0:
         
         elif menu_interno == 0:
             menu = 1
+            file = open("inventario.txt", "w")
+            for text in control_inventario:
+                file.write(text + "\n")
+            file.close()
             break
         
         else:
