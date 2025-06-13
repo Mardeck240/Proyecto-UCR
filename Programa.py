@@ -48,7 +48,7 @@ while menu!=0:
         continue
     while menu==1:
         try:
-            menu_interno= int(input("¿Que desea hacer? \n(1) Agregar producto \n(2) Ver productos \n(3) Eliminar productos \n(0) Retroceder \n"))
+            menu_interno= int(input("¿Que desea hacer? \n(1) Agregar producto \n(2) Ver productos \n(3) Eliminar productos \n(0) Retroceder"))
         except:
             print("Caracter o simbolo invalido, intente nuevamente")
             menu = 1
