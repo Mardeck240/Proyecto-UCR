@@ -1,3 +1,5 @@
+import pickle
+
 control_inventario= []
 registro_ventas=[]
 clientes= []
@@ -5,11 +7,24 @@ costos_producción= []
 cliente=[]
 cli=[]
 menu= -1
-categorias = {"Mano de obra" : {"Cascara" : 500, "Chocolate" : 20}}
+columnas = ["", "", "", "", "", "", ""]
+productos = {}
+ventas = {}
 
-print(categorias["Mano de obra"]["Chocolate"])
+try:
+    with open("ventas.pkl", "rb") as file2:
+        ventas = pickle.load(file2)
+        print(ventas)
+except:
+    pass
 
 
+try:
+    with open("productos.pkl", "rb") as file:
+        productos = pickle.load(file)
+        print(productos)
+except:
+    pass
 
 
 try:
@@ -52,6 +67,70 @@ def regresar():
         print("Carácter o símbolo inválido, intente nuevamente")
         return regresar()
 
+def calculo_costo_prod(mode = 0):
+    global columnas
+    columnas = ["", "", "", "", "", "", ""]
+    producto_cambio = ""
+    if mode != 0 and len(productos) > 0:
+        for i in productos.keys():
+            mode -= 1
+            if mode == 0:
+                mode -= 1
+                producto_cambio = i
+
+
+    try:
+        print(columnas)
+        nombre_prod = input("Digite el nombre del producto: ")
+        columnas[0] = nombre_prod
+        print(columnas)
+        cant_prod = float(input("Digite la cantidad del producto: "))
+        columnas[1] = cant_prod
+        print(columnas)
+        precio_prod = float(input("Digite el precio del producto: "))
+        columnas[2] = precio_prod
+        print(columnas)
+        medida1 = int(input("Digite la medida que desea utilizar\n1. Kg/L\n2. g/ml\n"))
+        if medida1 >= 2:
+            columnas[3] = "g/ml"
+        else:
+            columnas[3] = "Kg/L"
+        print(columnas)
+        cant_utilizar = float(input("Digite la cantidad que va a utilizar: "))
+        columnas[4] = cant_utilizar
+        print(columnas)
+        medida2 = int(input("Digite la medida que desea utilizar para trabajar\n1. Kg/L\n2. g/ml\n"))
+        if medida2 >= 2:
+            columnas[5] = "g/ml"
+        else:
+            columnas[5] = "Kg/L"
+        
+        variable_temp_division = precio_prod / cant_prod
+        if medida1 != medida2:
+            if medida1 < medida2:
+                costo_final = variable_temp_division * (cant_utilizar * 0.001)
+                columnas[6] = costo_final
+               
+                if medida1 > medida2:
+                   costo_final = variable_temp_division * (cant_utilizar * 1000)
+                   columnas[6] = costo_final
+        elif medida1 == medida2:
+            costo_final = variable_temp_division * cant_utilizar
+            columnas[6] = costo_final
+        print(columnas)
+        print(f"El costo final de este producto es: {costo_final}")
+        if mode != 0:
+            del productos[producto_cambio]
+        
+        productos[columnas[0]] = columnas[6]
+            
+        print(f"Producto guardado correctamente\n{productos}")
+        columnas = ["", "", "", "", "", "", ""]
+    except:
+        print("Ops... Algo salio mal, intentelo nuevamente")
+
+
+
 print("¡Bienvenido a nuestro programa!")
 
 while menu != 0:
@@ -71,9 +150,9 @@ while menu != 0:
         if menu_interno == 1:
             repetir = True
             while repetir:
-                productos = input("Escriba el nombre del producto que desea agregar al inventario de la empresa: ")
-                if productos != "":
-                    control_inventario.append(productos)
+                producto = input("Escriba el nombre del producto que desea agregar al inventario de la empresa: ")
+                if producto != "":
+                    control_inventario.append(producto)
                 decision = des()
                 if decision != 1:
                     repetir = False
@@ -264,39 +343,186 @@ while menu != 0:
     while menu == 4:
         try:
             print("---Menu costos de produccion y de ventas---")
-            menu_costosprod = int(input("¿Qué desea hacer?\n(1) Costos de producción\n(2) Costos de venta\n(0) Retroceder\n"))
+            menu_costosprodvent = int(input("¿Qué desea hacer?\n(1) Costos de producción\n(2) Costos de venta\n(0) Retroceder\n"))
         except:
             print("Carácter o símbolo inválido, intente nuevamente")
             continue
         
-        if menu_costosprod == 1:
+        if menu_costosprodvent == 1:
             while True:
                 print("---Menu costos de producción---")
                 try:
-                    submenuCP = int(input("¿Qué desea hacer?\n(1) Agregar producto\n(2) Agregar categoria\n(3)Eliminar categoria\n(4) Ver categorias\n(0) Retroceder\n"))
+                    submenuCP = int(input("Seleccione una opción\n(1) Nuevo producto\n(2) Configurar producto\n(3) Eliminar producto\n(4) Ver productos\n(0) Retroceder\n"))
                 except:
                     print("Carácter o símbolo inválido, intente nuevamente")
                     continue
                 
                 if submenuCP == 1:
-                    if len(categorias) > 0:
-                        numero_temp = 0
-                        for title in categorias.keys():
-                            numero_temp += 1
-                            print (f"{numero_temp}. {title}")
+                    calculo_costo_prod(0)
                         
-                        seleccion = int(input("Seleccione una categoria: "))
-                    else:
-                        print("No hay categorias!!")
                 
                 elif submenuCP == 2:
-                    nombre_categoria = input("Digite el nombre de la categoria: ")
-                    
+                    if len(productos) > 0:
+                        numero_temp = 0
+                        for prod in productos.keys():
+                            numero_temp += 1
+                            print(f"{numero_temp}. {prod}")
+                        
+                        product = int(input("Seleccione el producto que desea cambiar (si desea volver, pulse 0): "))
+                        if product != 0:
+                            calculo_costo_prod(product)
+                    else:
+                        print("No hay productos!!")
                 
+                elif submenuCP == 3:
+                    if len(productos) > 0:
+                        numero_temp = 0
+                        for prod in productos.keys():
+                            numero_temp += 1
+                            print(f"{numero_temp}. {prod}")
+                        
+                        product_elim = int(input("Seleccione el producto que desea eliminar (para cancelar, oprima 0): "))
+                        if product_elim != 0:
+                            for elim in productos.keys():
+                                product_elim -= 1
+                                if product_elim == 0:
+                                    variable_temp = elim
+                            
+                            del productos[variable_temp] # No se puede meter dentro del for, dara error
+                            print(f"Producto eliminado correctamente\n{productos}")
+                            
+                            
+                    else:
+                        print("No hay productos!!")
+                
+                elif submenuCP == 4:
+                    if len(productos) > 0:
+                        
+                        print ("Los producto se dividen por Nombre | Costo final")
+                        
+                        print(productos)
+                            
 
+                        
+                        regresar()
+                    else:
+                        print("No hay productos!!")
                     
 
-        elif menu_costosprod == 0:
+                elif submenuCP == 0:
+                    if len(productos) > 0:
+                        with open("productos.pkl", "wb") as file:
+                            pickle.dump(productos, file)
+                    menu = 4
+                    break
+                    
+        if menu_costosprodvent == 2:
+            while True:
+                print("---Menu costos de venta---")
+                try:
+                    submenuCV = int(input("Seleccione una opción\n(1) Nuevo producto\n(2) Eliminar producto\n(3) Ver productos\n(0) Retroceder\n"))
+                except:
+                    print("Carácter o símbolo inválido, intente nuevamente")
+                    continue
+                
+                if submenuCV == 1:
+                    prod_selec = -1
+                    another_columns = ["", "", ""]
+                    if len(productos) > 0:
+                        nombre_product = input("Digite el nombre de producto a registrar: ")
+                        another_columns[0] = nombre_product
+                        products_selected = []
+                        numero_temp = 0
+                        for venta in productos.keys():
+                            numero_temp += 1
+                            print(f"{numero_temp}. {venta}")
+
+                        while True:
+                            while prod_selec != 0:
+                                prod_selec = int(input("Seleccione los ingredientes que se uso para este producto (si desea terminar, seleccione 0): "))
+                            
+                                
+                                if 0 > prod_selec or prod_selec > len(productos):
+                                    print("Fuera de rango, intente nuevamente")
+                            
+                                elif prod_selec != 0:
+                                    for i in productos.keys():
+                                        prod_selec -= 1
+                                        if prod_selec == 0:
+                                            products_selected.append(i)
+                                            prod_selec -= 1
+
+                            ("Finalizado!")
+                            print(another_columns)
+                            break
+                        
+                    else:
+                        print("No hay productos!!")
+                        break
+                    
+                    if len(products_selected) > 0:
+                        suma_total = 0
+                        for sum in products_selected:
+                            suma_total += productos[sum]
+                        
+                        another_columns[1] = suma_total
+                        print(another_columns)
+
+                        porcentaje = int(input("Digite el porcentaje de ganancia (digitelo como numero entero, ej: 12 = 12%): "))
+                        if porcentaje > 100:
+                            porcentaje = 100
+                        elif porcentaje < 0:
+                            porcentaje = 0
+                        another_columns[2] = suma_total * (1 + (porcentaje / 100))
+                        print(another_columns)
+
+                        ventas[another_columns[0]] = another_columns[2]
+                    
+                    else:
+                        print("No se encontraron los ingredientes")
+                        break
+                
+                if submenuCV == 2:
+                    numero_temp = 0
+                    for venta in ventas.keys():
+                        numero_temp += 1
+                        print(f"{numero_temp}. {venta}")
+                    
+                    elim = int(input("Digite el producto que desea eliminar (presione 0 para cancelar): "))
+                    if elim != 0 and elim <= len(ventas):
+                        for eliminate in ventas.keys():
+                            elim -= 1
+                            if elim == 0:
+                                variable_temp = eliminate
+                        del ventas[variable_temp] # No se puede meter dentro del for, dara error
+                        print(f"Producto eliminado correctamente\n{ventas}")
+                    
+                    else:
+                        print("Producto no encontrado")
+                    
+                if submenuCV == 3:
+                    if len(ventas) > 0:
+                        
+                        print ("Los producto se dividen por Nombre | Costo de venta")
+                        
+                        print(ventas)
+                            
+
+                        
+                        regresar()
+                    else:
+                        print("No hay productos!!")
+
+                if submenuCV == 0:
+                    if len(ventas) > 0:
+                        with open("ventas.pkl", "wb") as file2:
+                            pickle.dump(ventas, file2)
+                    menu = 4
+                    break
+        
+
+
+        elif menu_costosprodvent == 0:
             menu = 1
             break
 
